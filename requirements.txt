@@ -2,3 +2,5 @@ streamlit
 streamlit-extras
 pandas
 Pillow
+requests
+streamlit-aggrid
