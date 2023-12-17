@@ -27,8 +27,19 @@ params = {
     "type": "bestsellers",
 }
 
+
 # make the http GET request to Rainforest API
-api_result = requests.get("https://api.rainforestapi.com/categories", params)
+@st.cache_data
+def get_bestsellers_categories():
+    api_result = requests.get(
+        "https://api.rainforestapi.com/categories",
+        params,
+    )
+
+    return api_result
+
+
+api_result = get_bestsellers_categories()
 
 
 bestsellers_categories = pd.DataFrame.from_dict(api_result.json().get("categories"))
