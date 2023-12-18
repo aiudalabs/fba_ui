@@ -8,6 +8,12 @@ import json
 
 import pandas as pd
 
+import keepa
+
+# enter real access key here
+accesskey = "75pbng069l13ht8qbtt9pmnubdbp2eu3m5d6aih13r9rd41kagu43q9euvfis0gm"
+api = keepa.Keepa(accesskey)
+
 
 @st.cache_data
 def get_best_sellers_by_category(category_id):
@@ -62,7 +68,6 @@ with st.sidebar:
     st.caption("Data from Amazon using https://rainforestapi.com/ API")
     # st.image(Image.open("pages/a.png"))
 
-
 # set up the request parameters
 params = {
     "api_key": "2758604B50A746EBA972BC894472FD83",
@@ -81,7 +86,7 @@ bestsellers_categories = bestsellers_categories.sort_values("name")
 options = st.multiselect(
     "Select Bestsellers Categories",
     bestsellers_categories.sort_values("name")["name"].values.tolist(),
-    ["Office Products", "Patio, Lawn & Garden", "Pet Supplies", "Toys & Games"],
+    ["Patio, Lawn & Garden"],
 )
 
 
@@ -105,10 +110,10 @@ if selected_df.shape[0] > 0:
     with col2:
         st.subheader("Rating")
         min_rating = st.number_input(
-            "Min Rating", value=0.0, min_value=0.0, max_value=3.0, format="%f"
+            "Min Rating", value=0.0, min_value=0.0, max_value=3.0, format="%f", step=0.5
         )
         max_rating = st.number_input(
-            "Max Rating", value=5.0, min_value=3.0, max_value=5.0, format="%f"
+            "Max Rating", value=5.0, min_value=3.0, max_value=5.0, format="%f", step=0.5
         )
 
     with col3:
@@ -118,7 +123,7 @@ if selected_df.shape[0] > 0:
         )
 
     if st.button("Find Products", type="primary"):
-        st.write("Finding Products...")
+        st.subheader("Products List")
 
         products = pd.DataFrame()
         for category_id in selected_df["id"].tolist():
@@ -135,7 +140,9 @@ if selected_df.shape[0] > 0:
             & (products.rating <= max_rating)
         ]
 
-        st.write(
+        products["selected"] = False
+
+        edited_df = st.data_editor(
             products[
                 [
                     "rank",
@@ -147,6 +154,27 @@ if selected_df.shape[0] > 0:
                     "ratings_total",
                     "price",
                     "current_category",
+                    "selected",
                 ]
-            ]
+            ],
+            column_config={"link": st.column_config.LinkColumn("Amazon Link")},
+            hide_index=True,
+            disabled=[
+                "rank",
+                "position",
+                "title",
+                "asin",
+                "link",
+                "rating",
+                "ratings_total",
+                "price",
+                "current_category",
+            ],
         )
+
+        # asins = products.head(3)["asin"].tolist()
+        # keepa_products = api.query(asins, offers=20)
+
+        # st.subheader("Products Details")
+
+        # st.write(keepa_products)
